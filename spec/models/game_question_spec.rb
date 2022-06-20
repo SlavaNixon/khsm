@@ -32,6 +32,7 @@ RSpec.describe GameQuestion, type: :model do
 
     it 'correct .correct_answer_key' do
       expect(game_question.correct_answer_key).to eq('b')
+      expect(game_question.correct_answer_key).not_to eq('c')
     end
   end
 
