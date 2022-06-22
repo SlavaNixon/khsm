@@ -117,4 +117,44 @@ RSpec.describe Game, type: :model do
       expect(game_w_questions.status).to eq(:money)
     end
   end
+
+  context 'answer_current_question!' do
+    it 'user pick correct answer' do
+      current_question = game_w_questions.current_game_question
+      game_w_questions.answer_current_question!(current_question.correct_answer_key)
+      
+      expect(game_w_questions.current_level).to eq 1
+      expect(game_w_questions.prize).to eq 0
+      expect(game_w_questions.status).to eq :in_progress
+    end
+
+    it 'user pick wrong answer' do
+      current_question = game_w_questions.current_game_question
+      game_w_questions.answer_current_question!("_")
+
+      expect(game_w_questions.current_level).to eq 0
+      expect(game_w_questions.prize).to eq 0
+      expect(game_w_questions.status).to eq :fail
+    end
+
+    it 'user pick right for last question' do
+      game_w_questions.game_questions.each do |current_question|
+        game_w_questions.answer_current_question!(current_question.correct_answer_key)
+      end
+
+      expect(game_w_questions.current_level).to eq 15
+      expect(game_w_questions.prize).to eq 1000000
+      expect(game_w_questions.status).to eq :won
+    end
+
+    it 'timeover' do
+      current_question = game_w_questions.current_game_question
+      game_w_questions.update(created_at: Time.now - Game::TIME_LIMIT*2)
+      game_w_questions.answer_current_question!(current_question.correct_answer_key)
+
+      expect(game_w_questions.current_level).to eq 0
+      expect(game_w_questions.prize).to eq 0
+      expect(game_w_questions.status).to eq :timeout
+    end
+  end
 end
